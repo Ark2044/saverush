@@ -74,6 +74,30 @@
       "sha1": "fb8fccca21550e71135f92bbaf8a2e8a12c90465"
     },
     {
+      "path": "src/assets/images/categories/bakery.svg",
+      "sha1": "bc1ff7394c6378a5c9f113a63441e547d92ee3d1"
+    },
+    {
+      "path": "src/assets/images/categories/chips.svg",
+      "sha1": "fb1b6e6a688869d0cd7067421b16a45a4082bb19"
+    },
+    {
+      "path": "src/assets/images/categories/chocolates.svg",
+      "sha1": "6486435d1d27e912df8d71ba736bb3dc1fe5c598"
+    },
+    {
+      "path": "src/assets/images/categories/dals.svg",
+      "sha1": "e4a72d70ab491d1255289cc2ee87864d300d7c06"
+    },
+    {
+      "path": "src/assets/images/categories/frozen.svg",
+      "sha1": "ec06b9802dab1a3c793f9b78304ae67972ab8861"
+    },
+    {
+      "path": "src/assets/images/categories/veggies.svg",
+      "sha1": "96a3fd19384b22dead4ccff8c351cda334190fdd"
+    },
+    {
       "path": "src/assets/images/icons/apple.png",
       "sha1": "1ab3641bb9fafa982aef515ed38314c695fc33b5"
     },
@@ -120,6 +144,10 @@
     {
       "path": "src/assets/images/login_screen/wheat.png",
       "sha1": "1fa1717841c057bed0870da83142643644c44d6b"
+    },
+    {
+      "path": "src/assets/lottie/home-delivery.json",
+      "sha1": "2370ac88cd1471cec1f478d8c7f8f999506b142e"
     }
   ]
 }

@@ -64,9 +64,13 @@ const OtpScreen: React.FC = () => {
       if (text !== '' && index < 5) {
         inputRefs.current[index + 1].focus();
       }
-      if (text === '' && index > 0) {
-        inputRefs.current[index - 1].focus();
-      }
+    }
+  };
+
+  // Handle backspace key press to move to previous input
+  const handleKeyPress = (e: any, index: number): void => {
+    if (e.nativeEvent.key === 'Backspace' && index > 0 && otp[index] === '') {
+      inputRefs.current[index - 1].focus();
     }
   };
 
@@ -94,6 +98,7 @@ const OtpScreen: React.FC = () => {
               otp={otp}
               handleChangeText={handleChangeText}
               inputRefs={inputRefs}
+              handleKeyPress={handleKeyPress}
             />
             <TouchableOpacity
               style={styles.verifyButton}

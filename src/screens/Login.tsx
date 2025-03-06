@@ -70,7 +70,9 @@ const LoginScreen: React.FC = () => {
 
   // Validate based on selected country's phone length
   useEffect(() => {
-    setIsValid(phoneNumber.length === selectedCountry.phoneLength);
+    // Default to 10 digits if phoneLength is not defined
+    const requiredLength = selectedCountry.phoneLength || 10;
+    setIsValid(phoneNumber.length === requiredLength);
   }, [phoneNumber, selectedCountry]);
 
   const handleContinue = (): void => {

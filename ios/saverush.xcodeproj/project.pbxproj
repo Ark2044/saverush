@@ -41,6 +41,13 @@
 		6F7DC29F9D5E4E51B85C4643 /* stationery.png in Resources */ = {isa = PBXBuildFile; fileRef = DD9B1F8F00784B3CBC302BDC /* stationery.png */; };
 		87C9D8ADA4714F19841BDE7B /* wheat.png in Resources */ = {isa = PBXBuildFile; fileRef = 50D5DD863EFF49E38ED0BD1C /* wheat.png */; };
 		F2AD0E07C05044C6A182C3C7 /* skin_care.png in Resources */ = {isa = PBXBuildFile; fileRef = F8CCE8AA51B94889930F15BE /* skin_care.png */; };
+		6C14F888E6D24FB99D2C7367 /* bakery.svg in Resources */ = {isa = PBXBuildFile; fileRef = F02AA402CD324CD9AF9A19D7 /* bakery.svg */; };
+		38020563FF764E4AB7B95E43 /* chips.svg in Resources */ = {isa = PBXBuildFile; fileRef = 82A9AFEB572744B399764409 /* chips.svg */; };
+		3E8A9D43496F4D759C5A2663 /* chocolates.svg in Resources */ = {isa = PBXBuildFile; fileRef = 5B76A5D393D043FF927F151F /* chocolates.svg */; };
+		3E41C26FCEB045D4AEB02E22 /* dals.svg in Resources */ = {isa = PBXBuildFile; fileRef = 60C8D4C83346426C8935BCDB /* dals.svg */; };
+		61FF102F074D4F2F88BC7146 /* frozen.svg in Resources */ = {isa = PBXBuildFile; fileRef = B1BC8C415A5443148D88CD73 /* frozen.svg */; };
+		F28BAC3761C8462287BDE93B /* veggies.svg in Resources */ = {isa = PBXBuildFile; fileRef = 5B04A2A19A054F758C1AAE84 /* veggies.svg */; };
+		CECEC64A65C2407484D13D6A /* home-delivery.json in Resources */ = {isa = PBXBuildFile; fileRef = A89FB6D2831244F7AE113FB4 /* home-delivery.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -95,6 +102,13 @@
 		DD9B1F8F00784B3CBC302BDC /* stationery.png */ = {isa = PBXFileReference; name = "stationery.png"; path = "../src/assets/images/login_screen/stationery.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		50D5DD863EFF49E38ED0BD1C /* wheat.png */ = {isa = PBXFileReference; name = "wheat.png"; path = "../src/assets/images/login_screen/wheat.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		F8CCE8AA51B94889930F15BE /* skin_care.png */ = {isa = PBXFileReference; name = "skin_care.png"; path = "../src/assets/images/login_screen/skin_care.png"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		F02AA402CD324CD9AF9A19D7 /* bakery.svg */ = {isa = PBXFileReference; name = "bakery.svg"; path = "../src/assets/images/categories/bakery.svg"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		82A9AFEB572744B399764409 /* chips.svg */ = {isa = PBXFileReference; name = "chips.svg"; path = "../src/assets/images/categories/chips.svg"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		5B76A5D393D043FF927F151F /* chocolates.svg */ = {isa = PBXFileReference; name = "chocolates.svg"; path = "../src/assets/images/categories/chocolates.svg"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		60C8D4C83346426C8935BCDB /* dals.svg */ = {isa = PBXFileReference; name = "dals.svg"; path = "../src/assets/images/categories/dals.svg"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		B1BC8C415A5443148D88CD73 /* frozen.svg */ = {isa = PBXFileReference; name = "frozen.svg"; path = "../src/assets/images/categories/frozen.svg"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		5B04A2A19A054F758C1AAE84 /* veggies.svg */ = {isa = PBXFileReference; name = "veggies.svg"; path = "../src/assets/images/categories/veggies.svg"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		A89FB6D2831244F7AE113FB4 /* home-delivery.json */ = {isa = PBXFileReference; name = "home-delivery.json"; path = "../src/assets/lottie/home-delivery.json"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -210,6 +224,13 @@
 				DD9B1F8F00784B3CBC302BDC /* stationery.png */,
 				50D5DD863EFF49E38ED0BD1C /* wheat.png */,
 				F8CCE8AA51B94889930F15BE /* skin_care.png */,
+				F02AA402CD324CD9AF9A19D7 /* bakery.svg */,
+				82A9AFEB572744B399764409 /* chips.svg */,
+				5B76A5D393D043FF927F151F /* chocolates.svg */,
+				60C8D4C83346426C8935BCDB /* dals.svg */,
+				B1BC8C415A5443148D88CD73 /* frozen.svg */,
+				5B04A2A19A054F758C1AAE84 /* veggies.svg */,
+				A89FB6D2831244F7AE113FB4 /* home-delivery.json */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -314,6 +335,13 @@
 				6F7DC29F9D5E4E51B85C4643 /* stationery.png in Resources */,
 				87C9D8ADA4714F19841BDE7B /* wheat.png in Resources */,
 				F2AD0E07C05044C6A182C3C7 /* skin_care.png in Resources */,
+				6C14F888E6D24FB99D2C7367 /* bakery.svg in Resources */,
+				38020563FF764E4AB7B95E43 /* chips.svg in Resources */,
+				3E8A9D43496F4D759C5A2663 /* chocolates.svg in Resources */,
+				3E41C26FCEB045D4AEB02E22 /* dals.svg in Resources */,
+				61FF102F074D4F2F88BC7146 /* frozen.svg in Resources */,
+				F28BAC3761C8462287BDE93B /* veggies.svg in Resources */,
+				CECEC64A65C2407484D13D6A /* home-delivery.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

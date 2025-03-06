@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {memo} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -49,4 +49,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TopBar;
+export default memo(TopBar);

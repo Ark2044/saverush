@@ -1,60 +1,48 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useCallback} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
   View,
   StatusBar,
-  ScrollView,
-  Alert,
-  PermissionsAndroid,
+  TouchableOpacity,
+  Text,
   Platform,
+  PermissionsAndroid,
+  Alert,
+  Dimensions,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
-import TopBar from '../components/location-screen/TopBar';
-import LocationSearchBar from '../components/location-screen/LocationSearchBar';
-import CurrentLocationButton from '../components/location-screen/CurrentLocationButton';
-import SavedLocations from '../components/location-screen/SavedLocations';
-import {COLORS} from '../../utils/Colors';
+import Icon from 'react-native-vector-icons/Ionicons';
 import Geolocation from 'react-native-geolocation-service';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import LocationGraphic from '../components/location-screen/LocationGraphic';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../../navigation/RootStackParams';
+import LinearGradient from 'react-native-linear-gradient';
+import LottieView from 'lottie-react-native';
 
-const LocationScreen: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedLocation, setSelectedLocation] = useState<string>('');
-  const [savedLocations, setSavedLocations] = useState<string[]>([]);
+type LocationScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'Location'
+>;
 
-  // Fetch saved locations from AsyncStorage (replace with your actual data source)
-  useEffect(() => {
-    const fetchSavedLocations = async () => {
-      try {
-        const data = await AsyncStorage.getItem('savedLocations');
-        if (data) {
-          setSavedLocations(JSON.parse(data));
-        }
-      } catch (error) {
-        console.error('Error fetching saved locations:', error);
-      }
-    };
-    fetchSavedLocations();
-  }, []);
+type Props = {
+  navigation: LocationScreenNavigationProp;
+};
 
-  const handleBackPress = () => {
-    // Implement your back navigation logic here
-    Alert.alert('Back pressed');
-  };
+const LocationScreen: React.FC<Props> = ({navigation}) => {
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
+  const [savedLocations, _setSavedLocations] = useState<string[]>([]);
 
-  const requestLocationPermission = async (): Promise<boolean> => {
+  const requestLocationPermission = useCallback(async (): Promise<boolean> => {
     if (Platform.OS === 'android') {
       try {
         const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
           {
-            title: 'Location Permission',
-            message: 'This app requires access to your location.',
-            buttonNeutral: 'Ask Me Later',
+            title: 'Location Access',
+            message:
+              'Allow access to find nearby restaurants and delivery services',
+            buttonNeutral: 'Ask Later',
             buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
+            buttonPositive: 'Enable',
           },
         );
         return granted === PermissionsAndroid.RESULTS.GRANTED;
@@ -63,112 +51,244 @@ const LocationScreen: React.FC = () => {
         return false;
       }
     } else {
-      // For iOS, permission is handled in Info.plist; assume it's granted for this example.
       return true;
     }
-  };
+  }, []);
 
-  const handleCurrentLocationPress = async () => {
+  const getCurrentLocation = useCallback(async () => {
     const hasPermission = await requestLocationPermission();
     if (!hasPermission) {
-      Alert.alert('Permission Denied', 'Location permission is required.');
+      Alert.alert(
+        'Permission Denied',
+        'Location access is required to find nearby restaurants.',
+      );
       return;
     }
+
     Geolocation.getCurrentPosition(
       position => {
-        // For demonstration, we're simply building an address string from the coordinates.
-        // In a real app, you would integrate with a reverse geocoding API.
         const {latitude, longitude} = position.coords;
-        const address = `Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(
-          4,
-        )}`;
-        setSearchQuery(address);
+
+        const address = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
         setSelectedLocation(address);
-        Alert.alert('Current Location', address);
+
+        navigation.navigate('AddressDetails', {
+          selectedLocation: address,
+          coordinates: {
+            latitude,
+            longitude,
+          },
+        });
       },
       error => {
         console.error(error);
-        Alert.alert('Error', 'An error occurred while fetching location.');
+        Alert.alert(
+          'Location Error',
+          'Could not retrieve location. Please try again.',
+          [{text: 'OK'}],
+        );
       },
       {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
     );
-  };
+  }, [navigation, requestLocationPermission]);
 
-  const handleSelectSavedLocation = (location: string) => {
-    setSearchQuery(location);
-    setSelectedLocation(location);
-    Alert.alert('Saved Location Selected', location);
-  };
+  const handleBackPress = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
 
-  const handleContinue = () => {
-    if (selectedLocation || searchQuery) {
-      Alert.alert(
-        'Location Selected',
-        `Your location: ${selectedLocation || searchQuery}`,
-      );
-      // Navigate to the next screen in your app
-    } else {
-      Alert.alert('No Location', 'Please enter or select a location.');
-    }
-  };
+  const handleSearchPress = useCallback(() => {
+    navigation.navigate('SearchAddress', {
+      savedLocations,
+      currentRegion: {
+        latitude: 28.6139,
+        longitude: 77.209,
+        latitudeDelta: 0.0922,
+        longitudeDelta:
+          0.0922 *
+          (Dimensions.get('window').width / Dimensions.get('window').height),
+      },
+    });
+  }, [navigation, savedLocations]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <LinearGradient colors={['#542BC9', '#291563']} style={styles.container}>
       <StatusBar
+        backgroundColor="transparent"
+        translucent={true}
         barStyle="light-content"
-        backgroundColor={COLORS.PRIMARY_PURPLE}
       />
-      <TopBar title="Delivery Address" onBackPress={handleBackPress} />
-      <LinearGradient
-        colors={[COLORS.PRIMARY_PURPLE, '#291563']}
-        style={styles.gradient}>
-        <ScrollView contentContainerStyle={styles.container}>
-          <View style={styles.mainContainer}>
-            <LocationSearchBar
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
+
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.topBar}>
+          <TouchableOpacity onPress={handleBackPress}>
+            <Icon name="arrow-back" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.contentContainer}>
+          <Text style={styles.titleText}>Where are you?</Text>
+          <Text style={styles.subtitleText}>
+            Select your location to order delicious food
+          </Text>
+
+          <TouchableOpacity
+            onPress={handleSearchPress}
+            style={styles.searchContainer}>
+            <Icon
+              name="search"
+              size={20}
+              color="#6A5ACD"
+              style={styles.searchIcon}
             />
-            <LocationGraphic />
-            <CurrentLocationButton onPress={handleCurrentLocationPress} />
-            <SavedLocations
-              locations={savedLocations}
-              onSelectLocation={handleSelectSavedLocation}
-            />
-            <View style={styles.continueContainer}>
-              {/* Dedicated Continue button */}
-              <CurrentLocationButton
-                onPress={handleContinue}
-                buttonText="Continue"
-              />
-            </View>
+            <Text style={styles.searchInput}>Enter your delivery address</Text>
+          </TouchableOpacity>
+
+          <View style={styles.orDivider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.orText}>OR</Text>
+            <View style={styles.dividerLine} />
           </View>
-        </ScrollView>
-      </LinearGradient>
-    </SafeAreaView>
+
+          <TouchableOpacity
+            style={styles.currentLocationButton}
+            onPress={getCurrentLocation}>
+            <Icon name="location-sharp" size={24} color="#6A5ACD" />
+            <Text style={styles.currentLocationButtonText}>
+              Use Current Location
+            </Text>
+          </TouchableOpacity>
+
+          {selectedLocation && (
+            <View style={styles.selectedLocationContainer}>
+              <Icon name="location-sharp" size={20} color="#6A5ACD" />
+              <Text style={styles.selectedLocationText}>
+                {selectedLocation}
+              </Text>
+            </View>
+          )}
+
+          <View style={styles.illustrationContainer}>
+            <LottieView
+              source={require('../assets/lottie/home-delivery.json')}
+              autoPlay
+              loop
+              style={styles.lottieStyle}
+            />
+          </View>
+        </View>
+      </SafeAreaView>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.PRIMARY_PURPLE,
   },
-  gradient: {
+  topBar: {
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  contentContainer: {
     flex: 1,
+    paddingHorizontal: 25,
+    paddingTop: 30,
   },
-  container: {
-    flexGrow: 1,
+  titleText: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 10,
   },
-  mainContainer: {
-    backgroundColor: COLORS.BACKGROUND_WHITE,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    padding: 20,
+  subtitleText: {
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.7)',
+    marginBottom: 30,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    height: 55,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    color: '#888',
+  },
+  orDivider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+  },
+  orText: {
+    marginHorizontal: 10,
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  currentLocationButton: {
+    backgroundColor: 'white',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 15,
+    borderRadius: 12,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  currentLocationButtonText: {
+    color: '#6A5ACD',
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  selectedLocationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    padding: 15,
+    borderRadius: 12,
     marginBottom: 20,
   },
-  continueContainer: {
-    marginTop: 20,
+  selectedLocationText: {
+    marginLeft: 10,
+    color: 'white',
+  },
+  illustrationContainer: {
     alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+  },
+  illustration: {
+    width: '100%',
+    maxHeight: 300,
+  },
+  lottieStyle: {
+    width: 300,
+    height: 300,
   },
 });
 

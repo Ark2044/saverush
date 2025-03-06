@@ -5,6 +5,7 @@ interface OtpInputsProps {
   otp: string[];
   handleChangeText: (text: string, index: number) => void;
   inputRefs: React.MutableRefObject<any[]>;
+  handleKeyPress?: (e: any, index: number) => void;
 }
 
 const INPUT_SIZE = 50;
@@ -16,6 +17,7 @@ const OtpInputs: React.FC<OtpInputsProps> = ({
   otp,
   handleChangeText,
   inputRefs,
+  handleKeyPress,
 }) => {
   return (
     <View style={styles.otpContainer}>
@@ -30,6 +32,7 @@ const OtpInputs: React.FC<OtpInputsProps> = ({
           maxLength={1}
           value={digit}
           onChangeText={text => handleChangeText(text, index)}
+          onKeyPress={e => handleKeyPress && handleKeyPress(e, index)}
           autoFocus={index === 0}
         />
       ))}

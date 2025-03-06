@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {memo} from 'react';
 import {View, TextInput, TouchableOpacity, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {COLORS} from '../../../utils/Colors';
@@ -6,11 +6,15 @@ import {COLORS} from '../../../utils/Colors';
 interface LocationSearchBarProps {
   searchQuery: string;
   setSearchQuery: (text: string) => void;
+  editable?: boolean;
+  autoFocus?: boolean;
 }
 
 const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
   searchQuery,
   setSearchQuery,
+  editable = true,
+  autoFocus = false,
 }) => {
   return (
     <View style={styles.searchContainer}>
@@ -26,6 +30,8 @@ const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
         style={styles.searchInput}
         value={searchQuery}
         onChangeText={setSearchQuery}
+        editable={editable}
+        autoFocus={autoFocus}
       />
       {searchQuery ? (
         <TouchableOpacity onPress={() => setSearchQuery('')}>
@@ -40,7 +46,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     backgroundColor: COLORS.LIGHT_GRAY,
-    borderRadius: 12,
+    borderRadius: 30,
     alignItems: 'center',
     paddingHorizontal: 15,
     marginBottom: 15,
@@ -49,7 +55,6 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.05,
     shadowRadius: 4,
-    elevation: 2,
   },
   searchIcon: {
     marginRight: 10,
@@ -61,4 +66,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LocationSearchBar;
+export default memo(LocationSearchBar);

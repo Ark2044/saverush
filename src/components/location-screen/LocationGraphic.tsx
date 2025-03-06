@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {memo} from 'react';
 import {View, Image, StyleSheet, Dimensions} from 'react-native';
 import {COLORS} from '../../../utils/Colors';
 
@@ -33,4 +33,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LocationGraphic;
+export default memo(LocationGraphic);
