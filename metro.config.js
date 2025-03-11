@@ -21,7 +21,7 @@ defaultConfig.resolver.sourceExts.push('svg');
 
 // 3) Custom config (inline requires, maxWorkers, etc.)
 const customConfig = {
-  maxWorkers: 2, // Reduce workers for lower CPU usage
+  maxWorkers: 1, // Reduce workers for lower CPU usage
   transformer: {
     getTransformOptions: async () => ({
       transform: {

@@ -26,4 +26,18 @@ export type RootStackParamList = {
       longitude: number;
     };
   };
+  User: undefined;
+  // Added screens for UserBottomSection navigation
+  OrdersScreen: undefined;
+  WalletScreen: undefined;
+  HelpCenterScreen: undefined;
+  AboutUsScreen: undefined;
+  ShippingOrdersScreen: undefined;
+  TermsScreen: undefined;
+  MyListScreen: undefined;
+  RequestProductScreen: undefined;
+  PaymentSettingScreen: undefined;
+  CouponScreen: undefined;
+  ContactUsScreen: undefined;
+  ShareAppScreen: undefined;
 };

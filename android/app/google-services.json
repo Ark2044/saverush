@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "326769722049",
+    "project_id": "save-rush",
+    "storage_bucket": "save-rush.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:326769722049:android:28424739fa51b3eedc4a40",
+        "android_client_info": {
+          "package_name": "com.saverush"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "326769722049-26fdcmgm8m1tr8s6csiagn93v7ftt3s6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.saverush",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "326769722049-vtbo16blm3idj6p8ip3ra7om98vfe2gm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFKMw3-m99gpEwtaqm1GtSL_ZWT0EXWNo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "326769722049-vtbo16blm3idj6p8ip3ra7om98vfe2gm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
