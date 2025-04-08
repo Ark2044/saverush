@@ -13,6 +13,8 @@ import {
   ActivityIndicator,
   View,
   Text,
+  StatusBar,
+  Dimensions,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {useNavigation} from '@react-navigation/native';
@@ -26,6 +28,8 @@ import SocialLoginButtons from '../components/login_screen/SocialLoginButtons';
 import {colors} from '../../utils/Colors';
 import {RootStackParamList} from '../../navigation/RootStackParams';
 
+const {height: SCREEN_HEIGHT} = Dimensions.get('window');
+
 const LoginScreen: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -34,7 +38,6 @@ const LoginScreen: React.FC = () => {
   const [selectedCountry, setSelectedCountry] = useState<Country>(COUNTRIES[0]);
   const shakeAnimation = useRef(new Animated.Value(0)).current;
 
-  // Use the typed navigation hook
   const nav = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   useEffect(() => {
@@ -56,9 +59,7 @@ const LoginScreen: React.FC = () => {
     };
   }, []);
 
-  // Validate based on selected country's phone length
   useEffect(() => {
-    // Default to 10 digits if phoneLength is not defined
     const requiredLength = selectedCountry.phoneLength || 10;
     setIsValid(phoneNumber.length === requiredLength);
   }, [phoneNumber, selectedCountry]);
@@ -102,9 +103,12 @@ const LoginScreen: React.FC = () => {
         'Success',
         `Verification code sent to ${selectedCountry.code} ${phoneNumber}`,
       );
-      // Navigate to OTP screen with dynamic country code
       nav.navigate('Otp', {phoneNumber, countryCode: selectedCountry.code});
     }, 1500);
+  };
+
+  const handleSkipLogin = (): void => {
+    nav.navigate('Location');
   };
 
   const dismissKeyboard = (): void => {
@@ -113,6 +117,7 @@ const LoginScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor="#542BC9" />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
@@ -122,7 +127,10 @@ const LoginScreen: React.FC = () => {
             colors={['#542BC9', '#291563']}
             style={styles.container}>
             <ScrollView
-              contentContainerStyle={styles.scrollContent}
+              contentContainerStyle={[
+                styles.scrollContent,
+                keyboardVisible && styles.scrollContentKeyboardVisible,
+              ]}
               showsVerticalScrollIndicator={false}
               bounces={false}
               keyboardShouldPersistTaps="handled">
@@ -158,15 +166,19 @@ const LoginScreen: React.FC = () => {
 
                 <Text style={styles.orDivider}>OR</Text>
                 <SocialLoginButtons />
+
+                <TouchableOpacity
+                  style={styles.skipButton}
+                  onPress={handleSkipLogin}>
+                  <Text style={styles.skipButtonText}>Skip Login</Text>
+                </TouchableOpacity>
               </View>
 
-              {!keyboardVisible && (
-                <Text style={styles.disclaimer}>
-                  By continuing, you agree to our{' '}
-                  <Text style={styles.link}>Terms of Use</Text> &amp;{' '}
-                  <Text style={styles.link}>Privacy Policy</Text>
-                </Text>
-              )}
+              <Text style={styles.disclaimer}>
+                By continuing, you agree to our{' '}
+                <Text style={styles.link}>Terms of Use</Text> &amp;{' '}
+                <Text style={styles.link}>Privacy Policy</Text>
+              </Text>
             </ScrollView>
           </LinearGradient>
         </TouchableWithoutFeedback>
@@ -190,8 +202,12 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 20,
     justifyContent: 'space-between',
-    paddingTop: 40,
+    paddingTop: Platform.OS === 'ios' ? 0 : 20,
     paddingBottom: 30,
+    minHeight: SCREEN_HEIGHT * 0.9,
+  },
+  scrollContentKeyboardVisible: {
+    paddingBottom: 20,
   },
   formSection: {
     width: '100%',
@@ -242,6 +258,16 @@ const styles = StyleSheet.create({
   link: {
     color: '#FFD166',
     fontWeight: '600',
+  },
+  skipButton: {
+    marginTop: 20,
+    padding: 10,
+  },
+  skipButtonText: {
+    color: '#FFD166',
+    fontSize: 16,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
 });
 

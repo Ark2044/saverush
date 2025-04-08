@@ -1,15 +1,65 @@
-import React from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import React, {useEffect, useRef} from 'react';
+import {View, Text, StyleSheet, Animated, Dimensions} from 'react-native';
 import GradientContainer from './GradientContainer';
-import { colors } from '../../../utils/Colors';
+import {colors} from '../../../utils/Colors';
 
 interface BrandSectionProps {
   keyboardVisible: boolean;
 }
 
-const HEADER_FONT_SIZE = 42;
-const SMALL_HEADER_FONT_SIZE = 32;
-const MARGIN_VERTICAL = 10;
+interface SlidingImageProps {
+  children: React.ReactNode;
+  direction: 'right' | 'left';
+}
+
+const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
+const HEADER_FONT_SIZE = SCREEN_WIDTH * 0.11; // Responsive font size
+const SMALL_HEADER_FONT_SIZE = SCREEN_WIDTH * 0.08;
+const MARGIN_VERTICAL = SCREEN_HEIGHT * 0.02;
+
+const SlidingImage: React.FC<SlidingImageProps> = ({children, direction}) => {
+  const slideAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(slideAnim, {
+          toValue: 1,
+          duration: 3000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 3000,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+
+    animation.start();
+
+    return () => {
+      animation.stop();
+    };
+  }, [slideAnim]);
+
+  const translateX = slideAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange:
+      direction === 'right'
+        ? [0, SCREEN_WIDTH * 0.05]
+        : [0, -SCREEN_WIDTH * 0.05],
+  });
+
+  return (
+    <Animated.View
+      style={{
+        transform: [{translateX}],
+      }}>
+      {children}
+    </Animated.View>
+  );
+};
 
 const BrandSection: React.FC<BrandSectionProps> = ({keyboardVisible}) => (
   <View
@@ -20,15 +70,21 @@ const BrandSection: React.FC<BrandSectionProps> = ({keyboardVisible}) => (
     {!keyboardVisible && (
       <>
         <View style={styles.gradientRow}>
-          <GradientContainer
-            imageSource={require('../../assets/images/login_screen/stationery.png')}
-          />
-          <GradientContainer
-            imageSource={require('../../assets/images/login_screen/skin_care.png')}
-          />
-          <GradientContainer
-            imageSource={require('../../assets/images/login_screen/nutella.png')}
-          />
+          <SlidingImage direction="right">
+            <GradientContainer
+              imageSource={require('../../assets/images/login_screen/stationery.png')}
+            />
+          </SlidingImage>
+          <SlidingImage direction="right">
+            <GradientContainer
+              imageSource={require('../../assets/images/login_screen/skin_care.png')}
+            />
+          </SlidingImage>
+          <SlidingImage direction="right">
+            <GradientContainer
+              imageSource={require('../../assets/images/login_screen/nutella.png')}
+            />
+          </SlidingImage>
         </View>
 
         <View style={styles.textContainer}>
@@ -39,15 +95,21 @@ const BrandSection: React.FC<BrandSectionProps> = ({keyboardVisible}) => (
         </View>
 
         <View style={styles.gradientRow}>
-          <GradientContainer
-            imageSource={require('../../assets/images/login_screen/chips.png')}
-          />
-          <GradientContainer
-            imageSource={require('../../assets/images/login_screen/grocery.png')}
-          />
-          <GradientContainer
-            imageSource={require('../../assets/images/login_screen/wheat.png')}
-          />
+          <SlidingImage direction="left">
+            <GradientContainer
+              imageSource={require('../../assets/images/login_screen/chips.png')}
+            />
+          </SlidingImage>
+          <SlidingImage direction="left">
+            <GradientContainer
+              imageSource={require('../../assets/images/login_screen/grocery.png')}
+            />
+          </SlidingImage>
+          <SlidingImage direction="left">
+            <GradientContainer
+              imageSource={require('../../assets/images/login_screen/wheat.png')}
+            />
+          </SlidingImage>
         </View>
       </>
     )}
@@ -58,10 +120,11 @@ const styles = StyleSheet.create({
   brandSection: {
     alignItems: 'center',
     width: '100%',
-    marginBottom: 20,
+    marginBottom: SCREEN_HEIGHT * 0.03,
+    paddingHorizontal: SCREEN_WIDTH * 0.05,
   },
   collapsedBrandSection: {
-    marginBottom: 10,
+    marginBottom: SCREEN_HEIGHT * 0.01,
   },
   gradientRow: {
     flexDirection: 'row',
@@ -71,7 +134,7 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     alignItems: 'center',
-    marginVertical: 15,
+    marginVertical: SCREEN_HEIGHT * 0.02,
     width: '100%',
   },
   header: {
@@ -83,17 +146,17 @@ const styles = StyleSheet.create({
     textShadowOffset: {width: 0, height: 4},
     textShadowRadius: 4,
     textShadowColor: 'rgba(0, 0, 0, 0.25)',
-    lineHeight: 60,
+    lineHeight: HEADER_FONT_SIZE * 1.4,
     letterSpacing: 2,
     marginBottom: 5,
   },
   smallHeader: {
     fontSize: SMALL_HEADER_FONT_SIZE,
-    lineHeight: 40,
+    lineHeight: SMALL_HEADER_FONT_SIZE * 1.4,
     marginBottom: 0,
   },
   tagline: {
-    fontSize: 20,
+    fontSize: SCREEN_WIDTH * 0.05,
     color: '#E0E0E0',
     textAlign: 'center',
     fontFamily: 'Poppins-Medium',

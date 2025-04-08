@@ -40,4 +40,32 @@ export type RootStackParamList = {
   CouponScreen: undefined;
   ContactUsScreen: undefined;
   ShareAppScreen: undefined;
+  // New screens for product and checkout flow
+  ProductSearch: undefined;
+  ProductDetails: {
+    productId: string;
+    productName: string;
+    productPrice: number;
+    productImage: string;
+  };
+  ShoppingCart: undefined;
+  Checkout: {
+    cartItems: Array<{
+      id: string;
+      name: string;
+      price: number;
+      quantity: number;
+      image: string;
+    }>;
+    total: number;
+  };
+  OrderTracking: {
+    orderId: string;
+    status:
+      | 'pending'
+      | 'confirmed'
+      | 'preparing'
+      | 'out_for_delivery'
+      | 'delivered';
+  };
 };
