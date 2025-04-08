@@ -48,6 +48,9 @@ export type RootStackParamList = {
     productPrice: number;
     productImage: string;
   };
+  SubView: {
+    category: string;
+  };
   ShoppingCart: undefined;
   Checkout: {
     cartItems: Array<{
@@ -68,4 +71,8 @@ export type RootStackParamList = {
       | 'out_for_delivery'
       | 'delivered';
   };
+  Orders: undefined;
+  Wallet: undefined;
+  Profile: undefined;
+  Settings: undefined;
 };

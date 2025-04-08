@@ -12,8 +12,6 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import TopBar from '../components/location_screen/TopBar';
-import {COLORS} from '../../utils/Colors';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../navigation/RootStackParams';
@@ -35,236 +33,144 @@ type Props = {
   route: AddressDetailsScreenRouteProp;
 };
 
-const AddressDetails: React.FC<Props> = ({navigation, route}) => {
+const AddressDetailsScreen: React.FC<Props> = ({navigation, route}) => {
   const {selectedLocation, coordinates} = route.params;
-
-  const [addressType, setAddressType] = useState<'Home' | 'Work' | 'Other'>(
-    'Home',
-  );
-  const [flatNumber, setFlatNumber] = useState('');
-  const [landmark, setLandmark] = useState('');
-  const [instruction, setInstruction] = useState('');
-  const [contactName, setContactName] = useState('');
-  const [contactPhone, setContactPhone] = useState('');
+  const [addressDetails, setAddressDetails] = useState({
+    flatNo: '',
+    landmark: '',
+    addressType: 'Home',
+    receiverDetails: '',
+  });
 
   const handleBackPress = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
 
-  const validateForm = useCallback((): boolean => {
-    if (!flatNumber.trim()) {
-      Alert.alert('Missing Information', 'Please enter your flat/house number');
-      return false;
-    }
-
-    if (!contactName.trim()) {
-      Alert.alert('Missing Information', 'Please enter a contact name');
-      return false;
-    }
-
-    if (!contactPhone.trim()) {
-      Alert.alert('Invalid Phone', 'Please enter a phone number');
-      return false;
-    }
-
-    const phoneRegex = /^\d{10}$/;
-    if (!phoneRegex.test(contactPhone)) {
-      Alert.alert(
-        'Invalid Phone',
-        'Please enter a valid 10-digit phone number',
-      );
-      return false;
-    }
-
-    return true;
-  }, [flatNumber, contactName, contactPhone]);
-
   const handleSaveAddress = useCallback(async () => {
-    if (!validateForm()) {
+    if (!addressDetails.flatNo) {
+      Alert.alert('Error', 'Please fill in the required fields');
       return;
     }
 
     try {
-      // Create full address object
       const fullAddress = {
-        type: addressType,
-        address: selectedLocation,
-        flatNumber,
-        landmark,
-        instruction,
-        contactName,
-        contactPhone,
+        location: selectedLocation,
+        flatNo: addressDetails.flatNo,
+        landmark: addressDetails.landmark,
+        type: addressDetails.addressType,
+        receiverDetails: addressDetails.receiverDetails,
         coordinates,
-        timestamp: new Date().toISOString(), // Add timestamp for sorting/tracking
       };
 
-      // Save to saved addresses
+      // Save to AsyncStorage
       const savedAddresses = await AsyncStorage.getItem('savedLocations');
-      let addresses = [];
+      let addresses = savedAddresses ? JSON.parse(savedAddresses) : [];
 
-      try {
-        addresses = savedAddresses ? JSON.parse(savedAddresses) : [];
-        if (!Array.isArray(addresses)) {
-          addresses = [];
-        }
-      } catch (parseError) {
-        console.error('Error parsing saved addresses:', parseError);
-        addresses = [];
-      }
+      // Format for display
+      const displayAddress = `${addressDetails.flatNo}, ${selectedLocation}`;
+      addresses = [displayAddress, ...addresses];
 
-      // Format the address string for display
-      const addressString = `${addressType} - ${flatNumber}, ${selectedLocation}`;
-
-      // Only add if not already in list
-      if (!addresses.includes(addressString)) {
-        addresses = [addressString, ...addresses].slice(0, 5); // Keep only 5 addresses
-        await AsyncStorage.setItem('savedLocations', JSON.stringify(addresses));
-      }
-
-      // Save full address details separately
-      const fullAddresses = await AsyncStorage.getItem('fullAddresses');
-      let addressesDetails: { [key: string]: typeof fullAddress } = {};
-
-      try {
-        addressesDetails = fullAddresses ? JSON.parse(fullAddresses) : {};
-      } catch (parseError) {
-        console.error('Error parsing full addresses:', parseError);
-        addressesDetails = {};
-      }
-
-      addressesDetails[addressString] = fullAddress;
+      await AsyncStorage.setItem('savedLocations', JSON.stringify(addresses));
       await AsyncStorage.setItem(
-        'fullAddresses',
-        JSON.stringify(addressesDetails),
+        `address_${displayAddress}`,
+        JSON.stringify(fullAddress),
       );
 
-      // Navigate to Home screen with the full address details
-      navigation.navigate('Home', {
-        selectedLocation: addressString,
-        coordinates,
-      });
+      // Navigate to Home screen
+      navigation.navigate('Home');
     } catch (error) {
       console.error('Error saving address:', error);
-      Alert.alert('Error', 'There was a problem saving your address.');
+      Alert.alert('Error', 'Failed to save address. Please try again.');
     }
-  }, [
-    validateForm,
-    addressType,
-    selectedLocation,
-    flatNumber,
-    landmark,
-    instruction,
-    contactName,
-    contactPhone,
-    coordinates,
-    navigation,
-  ]);
+  }, [addressDetails, selectedLocation, coordinates, navigation]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={COLORS.PRIMARY_PURPLE}
-      />
-      <TopBar title="Complete Address" onBackPress={handleBackPress} />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardAvoidingView}>
-        <ScrollView style={styles.container}>
-          <View style={styles.locationView}>
-            <Icon name="location" size={24} color={COLORS.PRIMARY_PURPLE} />
-            <Text style={styles.locationText}>{selectedLocation}</Text>
+      <StatusBar barStyle="dark-content" backgroundColor="white" />
+
+      <View style={styles.header}>
+        <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
+          <Icon name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Add Address</Text>
+      </View>
+
+      <ScrollView style={styles.scrollContainer}>
+        <View style={styles.locationCard}>
+          <Text style={styles.locationText}>{selectedLocation}</Text>
+        </View>
+
+        <View style={styles.formContainer}>
+          <Text style={styles.sectionTitle}>Add Address</Text>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>House No. & Floor *</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter house/flat number"
+              value={addressDetails.flatNo}
+              onChangeText={text =>
+                setAddressDetails({...addressDetails, flatNo: text})
+              }
+            />
           </View>
 
-          <View style={styles.formSection}>
-            <Text style={styles.sectionTitle}>Address Type</Text>
-            <View style={styles.addressTypeContainer}>
-              {['Home', 'Work', 'Other'].map(type => (
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Landmark & Area Name</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter landmark"
+              value={addressDetails.landmark}
+              onChangeText={text =>
+                setAddressDetails({...addressDetails, landmark: text})
+              }
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Label</Text>
+            <View style={styles.labelContainer}>
+              {['Home', 'Work', 'Other'].map(label => (
                 <TouchableOpacity
-                  key={type}
+                  key={label}
                   style={[
-                    styles.addressTypeButton,
-                    addressType === type && styles.addressTypeButtonActive,
+                    styles.labelButton,
+                    addressDetails.addressType === label &&
+                      styles.selectedLabelButton,
                   ]}
                   onPress={() =>
-                    setAddressType(type as 'Home' | 'Work' | 'Other')
+                    setAddressDetails({...addressDetails, addressType: label})
                   }>
                   <Text
                     style={[
-                      styles.addressTypeText,
-                      addressType === type && styles.addressTypeTextActive,
+                      styles.labelText,
+                      addressDetails.addressType === label &&
+                        styles.selectedLabelText,
                     ]}>
-                    {type}
+                    {label}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
           </View>
 
-          <View style={styles.formSection}>
-            <Text style={styles.sectionTitle}>Flat / House / Floor *</Text>
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Receivers Contact Details</Text>
             <TextInput
-              style={styles.textInput}
-              placeholder="E.g. Flat 101, Floor 3, Tower B"
-              value={flatNumber}
-              onChangeText={setFlatNumber}
+              style={styles.input}
+              placeholder="Enter contact details"
+              value={addressDetails.receiverDetails}
+              onChangeText={text =>
+                setAddressDetails({...addressDetails, receiverDetails: text})
+              }
             />
           </View>
+        </View>
+      </ScrollView>
 
-          <View style={styles.formSection}>
-            <Text style={styles.sectionTitle}>Landmark (Optional)</Text>
-            <TextInput
-              style={styles.textInput}
-              placeholder="E.g. Near ABC School"
-              value={landmark}
-              onChangeText={setLandmark}
-            />
-          </View>
-
-          <View style={styles.formSection}>
-            <Text style={styles.sectionTitle}>Contact Name *</Text>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Name of person at this address"
-              value={contactName}
-              onChangeText={setContactName}
-            />
-          </View>
-
-          <View style={styles.formSection}>
-            <Text style={styles.sectionTitle}>Contact Phone *</Text>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Phone number for delivery"
-              value={contactPhone}
-              onChangeText={setContactPhone}
-              keyboardType="phone-pad"
-              maxLength={10}
-            />
-          </View>
-
-          <View style={styles.formSection}>
-            <Text style={styles.sectionTitle}>
-              Delivery Instructions (Optional)
-            </Text>
-            <TextInput
-              style={[styles.textInput, styles.instructionInput]}
-              placeholder="E.g. Ring doorbell, call when nearby, etc."
-              value={instruction}
-              onChangeText={setInstruction}
-              multiline
-              numberOfLines={3}
-              textAlignVertical="top"
-            />
-          </View>
-
-          <TouchableOpacity
-            style={styles.saveButton}
-            onPress={handleSaveAddress}>
-            <Text style={styles.saveButtonText}>Save & Continue</Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </KeyboardAvoidingView>
+      <TouchableOpacity style={styles.saveButton} onPress={handleSaveAddress}>
+        <Text style={styles.saveButtonText}>Save Address</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -272,87 +178,103 @@ const AddressDetails: React.FC<Props> = ({navigation, route}) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.PRIMARY_PURPLE,
+    backgroundColor: 'white',
   },
-  keyboardAvoidingView: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.BACKGROUND_WHITE,
-    padding: 16,
-  },
-  locationView: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.LIGHT_GRAY,
-    padding: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  backButton: {
+    marginRight: 16,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  locationCard: {
+    margin: 16,
+    padding: 16,
+    backgroundColor: '#f5f5f5',
     borderRadius: 8,
-    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
   locationText: {
-    flex: 1,
-    marginLeft: 8,
     fontSize: 16,
-    color: COLORS.DARK_GRAY,
+    color: '#333',
   },
-  formSection: {
-    marginBottom: 20,
+  formContainer: {
+    padding: 16,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.PRIMARY_PURPLE,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 16,
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 14,
+    color: '#666',
     marginBottom: 8,
   },
-  addressTypeContainer: {
+  input: {
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: '#f8f8f8',
+  },
+  labelContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  addressTypeButton: {
+  labelButton: {
     flex: 1,
-    alignItems: 'center',
-    paddingVertical: 12,
-    backgroundColor: COLORS.LIGHT_GRAY,
-    borderRadius: 8,
     marginHorizontal: 4,
-  },
-  addressTypeButtonActive: {
-    backgroundColor: COLORS.PRIMARY_PURPLE,
-  },
-  addressTypeText: {
-    fontSize: 16,
-    color: COLORS.DARK_GRAY,
-  },
-  addressTypeTextActive: {
-    color: COLORS.BACKGROUND_WHITE,
-    fontWeight: '600',
-  },
-  textInput: {
-    backgroundColor: COLORS.LIGHT_GRAY,
-    borderRadius: 8,
-    paddingHorizontal: 12,
     paddingVertical: 10,
-    fontSize: 16,
-    color: COLORS.DARK_GRAY,
+    paddingHorizontal: 8,
+    borderRadius: 20,
+    backgroundColor: '#f0f0f0',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  instructionInput: {
-    height: 100,
-    paddingTop: 12,
+  selectedLabelButton: {
+    backgroundColor: '#e6f9d8',
+    borderWidth: 1,
+    borderColor: '#9ee659',
+  },
+  labelText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  selectedLabelText: {
+    color: '#333',
+    fontWeight: 'bold',
   },
   saveButton: {
-    backgroundColor: COLORS.ACCENT_GREEN,
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: '#9ee659',
+    margin: 16,
+    padding: 16,
+    borderRadius: 8,
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 40,
   },
   saveButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: COLORS.DARK_GRAY,
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
 
-export default AddressDetails;
+export default AddressDetailsScreen;

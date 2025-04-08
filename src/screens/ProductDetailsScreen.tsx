@@ -8,12 +8,15 @@ import {
   TouchableOpacity,
   Dimensions,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../navigation/RootStackParams';
-import {colors} from '../../utils/Colors';
+import {RootStackParamList} from '../../navigation/RootStackParams';
+import { colors } from '../../utils/Colors';
+import {useCart} from '../context/CartContext';
+import {useUser} from '../context/UserContext';
 
 type ProductDetailsRouteProp = RouteProp<RootStackParamList, 'ProductDetails'>;
 type ProductDetailsNavigationProp = NativeStackNavigationProp<
@@ -25,23 +28,69 @@ const ProductDetailsScreen: React.FC = () => {
   const navigation = useNavigation<ProductDetailsNavigationProp>();
   const route = useRoute<ProductDetailsRouteProp>();
   const {productId, productName, productPrice, productImage} = route.params;
+  const {dispatch: cartDispatch} = useCart();
+  const {state: userState} = useUser();
 
   const [quantity, setQuantity] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAddToCart = useCallback(async () => {
+    if (!userState.isAuthenticated) {
+      Alert.alert(
+        'Authentication Required',
+        'Please login to add items to cart',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'Login',
+            onPress: () => navigation.navigate('Login'),
+          },
+        ],
+      );
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // TODO: Replace with actual cart API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      cartDispatch({
+        type: 'ADD_ITEM',
+        payload: {
+          id: productId,
+          name: productName,
+          price: productPrice,
+          quantity,
+          image: productImage,
+        },
+      });
 
-      navigation.navigate('ShoppingCart');
+      Alert.alert('Success', 'Item added to cart', [
+        {
+          text: 'Continue Shopping',
+          style: 'cancel',
+        },
+        {
+          text: 'View Cart',
+          onPress: () => navigation.navigate('ShoppingCart'),
+        },
+      ]);
     } catch (error) {
-      console.error('Error adding to cart:', error);
+      Alert.alert('Error', 'Failed to add item to cart');
     } finally {
       setIsLoading(false);
     }
-  }, [navigation]);
+  }, [
+    cartDispatch,
+    navigation,
+    productId,
+    productName,
+    productPrice,
+    productImage,
+    quantity,
+    userState.isAuthenticated,
+  ]);
 
   const updateQuantity = useCallback((change: number) => {
     setQuantity(prev => {

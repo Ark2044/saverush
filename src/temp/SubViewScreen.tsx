@@ -16,7 +16,6 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {RootStackParamList} from '../../navigation/RootStackParams';
 import {useCart} from '../context/CartContext';
-import BottomTabBar from '../components/BottomTabBar';
 
 type SubViewRouteProp = {
   params: {
@@ -250,7 +249,17 @@ const SubView: React.FC = () => {
           </View>
 
           {/* Bottom Tab Bar */}
-          <BottomTabBar activeTab="home" />
+          <View style={styles.tabBar}>
+            <TouchableOpacity style={styles.tabItem}>
+              <Icon name="home" size={24} color="#777" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.tabItem}>
+              <Icon name="cart" size={24} color="#777" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.tabItem}>
+              <Icon name="refresh" size={24} color="#777" />
+            </TouchableOpacity>
+          </View>
         </View>
       </SafeAreaView>
     </>
@@ -430,6 +439,21 @@ const styles = StyleSheet.create({
   navCategoryText: {
     fontSize: 12,
     fontWeight: '500',
+  },
+  tabBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    height: 50,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    paddingBottom: Platform.OS === 'ios' ? 16 : 0,
+  },
+  tabItem: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

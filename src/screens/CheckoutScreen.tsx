@@ -10,18 +10,28 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../navigation/RootStackParams';
-import {colors} from '../../utils/Colors';
+import {RootStackParamList} from '../../navigation/RootStackParams';
+import { colors } from '../../utils/Colors';
+import {useCart} from '../context/CartContext';
+import {useOrder} from '../context/OrderContext';
+import {useUser} from '../context/UserContext';
 
 type CheckoutScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'Checkout'
 >;
+type CheckoutScreenRouteProp = RouteProp<RootStackParamList, 'Checkout'>;
 
 const CheckoutScreen: React.FC = () => {
   const navigation = useNavigation<CheckoutScreenNavigationProp>();
+  const route = useRoute<CheckoutScreenRouteProp>();
+  const {cartItems, total} = route.params;
+  const {dispatch: cartDispatch} = useCart();
+  const {dispatch: orderDispatch} = useOrder();
+  const {state: userState} = useUser();
+
   const [isLoading, setIsLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'cash'>('card');
   const [cardDetails, setCardDetails] = useState({
@@ -34,16 +44,40 @@ const CheckoutScreen: React.FC = () => {
   const handlePayment = useCallback(async () => {
     setIsLoading(true);
     try {
-      // TODO: Replace with actual payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Generate a unique order ID
+      const orderId = `ORD-${Date.now()}`;
+
+      // Create the order
+      const order = {
+        id: orderId,
+        items: cartItems,
+        total,
+        status: 'pending' as const,
+        deliveryAddress:
+          userState.user?.addresses.find(
+            addr => addr.id === userState.user?.defaultAddressId,
+          )?.street || '',
+        paymentMethod,
+        createdAt: new Date().toISOString(),
+      };
+
+      // Dispatch the order
+      orderDispatch({type: 'CREATE_ORDER', payload: order});
+
+      // Clear the cart
+      cartDispatch({type: 'CLEAR_CART'});
 
       Alert.alert(
-        'Payment Successful',
+        'Order Placed Successfully',
         'Your order has been placed successfully!',
         [
           {
-            text: 'OK',
-            onPress: () => navigation.navigate('Home'),
+            text: 'Track Order',
+            onPress: () =>
+              navigation.navigate('OrderTracking', {
+                orderId,
+                status: 'pending',
+              }),
           },
         ],
       );
@@ -55,7 +89,16 @@ const CheckoutScreen: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [navigation]);
+  }, [
+    cartDispatch,
+    cartItems,
+    navigation,
+    orderDispatch,
+    paymentMethod,
+    total,
+    userState.user?.addresses,
+    userState.user?.defaultAddressId,
+  ]);
 
   const renderPaymentMethod = (
     method: 'card' | 'cash',
@@ -142,7 +185,7 @@ const CheckoutScreen: React.FC = () => {
           <Text style={styles.sectionTitle}>Order Summary</Text>
           <View style={styles.summaryItem}>
             <Text style={styles.summaryLabel}>Subtotal</Text>
-            <Text style={styles.summaryValue}>$45.99</Text>
+            <Text style={styles.summaryValue}>${total.toFixed(2)}</Text>
           </View>
           <View style={styles.summaryItem}>
             <Text style={styles.summaryLabel}>Delivery Fee</Text>
@@ -150,11 +193,13 @@ const CheckoutScreen: React.FC = () => {
           </View>
           <View style={styles.summaryItem}>
             <Text style={styles.summaryLabel}>Tax</Text>
-            <Text style={styles.summaryValue}>$3.45</Text>
+            <Text style={styles.summaryValue}>${(total * 0.1).toFixed(2)}</Text>
           </View>
           <View style={[styles.summaryItem, styles.totalItem]}>
             <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalValue}>$52.43</Text>
+            <Text style={styles.totalValue}>
+              ${(total + 2.99 + total * 0.1).toFixed(2)}
+            </Text>
           </View>
         </View>
       </ScrollView>

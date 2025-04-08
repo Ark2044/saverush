@@ -19,7 +19,6 @@ import {useCart} from '../context/CartContext';
 import Icon from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import BottomTabBar from '../components/BottomTabBar';
 
 const {width, height} = Dimensions.get('window');
 
@@ -130,9 +129,7 @@ const HomeScreen = () => {
             </View>
             <Text style={styles.deliverySubText}>Delivery in First</Text>
           </View>
-          <TouchableOpacity
-            style={styles.profileIcon}
-            onPress={() => navigation.navigate('User')}>
+          <TouchableOpacity style={styles.profileIcon}>
             <Icon name="person" size={24} color="white" />
           </TouchableOpacity>
         </View>
@@ -232,7 +229,19 @@ const HomeScreen = () => {
         </ScrollView>
 
         {/* Bottom Navigation */}
-        <BottomTabBar activeTab="home" />
+        <View style={styles.bottomNav}>
+          <TouchableOpacity style={styles.navItem}>
+            <Icon name="home" size={24} color="#542BC9" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => navigation.navigate('ShoppingCart')}>
+            <Icon name="cart" size={24} color="#777" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem}>
+            <Icon name="person" size={24} color="#777" />
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     </>
   );
@@ -447,6 +456,25 @@ const styles = StyleSheet.create({
   },
   addToCartText: {
     fontSize: 9,
+  },
+  bottomNav: {
+    flexDirection: 'row',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'white',
+    height: 50,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingBottom: Platform.OS === 'ios' ? 16 : 0,
+  },
+  navItem: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

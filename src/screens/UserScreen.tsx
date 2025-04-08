@@ -5,9 +5,11 @@ import {
   StyleSheet,
   ScrollView,
   StatusBar,
+  Platform,
 } from 'react-native';
 import UserTopSection from '../components/user_screen/UserTopSection';
 import UserBottomSection from '../components/user_screen/UserBottomSection';
+import BottomTabBar from '../components/BottomTabBar';
 
 const UserScreen = () => {
   return (
@@ -21,6 +23,7 @@ const UserScreen = () => {
           contentContainerStyle={styles.scrollContent}>
           <UserBottomSection />
         </ScrollView>
+        <BottomTabBar activeTab="user" />
       </View>
     </SafeAreaView>
   );
@@ -40,7 +43,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 20, // Add some padding at the bottom
+    paddingBottom: Platform.OS === 'ios' ? 80 : 60, // Additional padding to account for BottomTabBar
   },
 });
 

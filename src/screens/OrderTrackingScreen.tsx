@@ -6,27 +6,67 @@ import {
   ScrollView,
   Image,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
-import {useRoute, RouteProp} from '@react-navigation/native';
-import {RootStackParamList} from '../navigation/RootStackParams';
+import {useRoute, RouteProp, useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../../navigation/RootStackParams';
 import {colors} from '../../utils/Colors';
 import LottieView from 'lottie-react-native';
+import {useOrder} from '../context/OrderContext';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 type OrderTrackingRouteProp = RouteProp<RootStackParamList, 'OrderTracking'>;
+type OrderTrackingNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'OrderTracking'
+>;
 
 const OrderTrackingScreen: React.FC = () => {
   const route = useRoute<OrderTrackingRouteProp>();
-  const {orderId, status} = route.params;
+  const navigation = useNavigation<OrderTrackingNavigationProp>();
+  const {orderId, status: initialStatus} = route.params;
+  const {state: orderState, dispatch: orderDispatch} = useOrder();
+  const [status, setStatus] = useState(initialStatus);
   const [estimatedTime, setEstimatedTime] = useState<string>('');
 
   useEffect(() => {
-    // Simulate fetching estimated delivery time
-    const timer = setTimeout(() => {
-      setEstimatedTime('30-45 minutes');
-    }, 1000);
+    // Simulate order status updates
+    const statusUpdates = [
+      {status: 'confirmed', delay: 5000},
+      {status: 'preparing', delay: 10000},
+      {status: 'out_for_delivery', delay: 15000},
+      {status: 'delivered', delay: 20000},
+    ];
 
-    return () => clearTimeout(timer);
-  }, []);
+    let currentIndex = 0;
+    const timers: NodeJS.Timeout[] = [];
+
+    const updateStatus = () => {
+      if (currentIndex < statusUpdates.length) {
+        const {status: newStatus, delay} = statusUpdates[currentIndex];
+        const timer = setTimeout(() => {
+          setStatus(newStatus);
+          orderDispatch({
+            type: 'UPDATE_ORDER_STATUS',
+            payload: {orderId, status: newStatus},
+          });
+          currentIndex++;
+          updateStatus();
+        }, delay);
+        timers.push(timer);
+      }
+    };
+
+    updateStatus();
+
+    // Set initial estimated time
+    setEstimatedTime('30-45 minutes');
+
+    return () => {
+      timers.forEach(timer => clearTimeout(timer));
+    };
+  }, [orderDispatch, orderId]);
 
   const getStatusDetails = () => {
     switch (status) {
@@ -72,78 +112,96 @@ const OrderTrackingScreen: React.FC = () => {
   const statusDetails = getStatusDetails();
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <View style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" size={24} color={colors.primary} />
+        </TouchableOpacity>
         <Text style={styles.orderId}>Order #{orderId}</Text>
+      </View>
+
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.contentContainer}>
         {estimatedTime && (
           <Text style={styles.estimatedTime}>
             Estimated delivery: {estimatedTime}
           </Text>
         )}
-      </View>
 
-      <View style={styles.statusContainer}>
-        <LottieView
-          source={statusDetails.animation}
-          autoPlay
-          loop={status !== 'delivered'}
-          style={styles.animation}
-        />
-        <Text style={styles.statusTitle}>{statusDetails.title}</Text>
-        <Text style={styles.statusDescription}>
-          {statusDetails.description}
-        </Text>
-      </View>
+        <View style={styles.statusContainer}>
+          <LottieView
+            source={statusDetails.animation}
+            autoPlay
+            loop={status !== 'delivered'}
+            style={styles.animation}
+          />
+          <Text style={styles.statusTitle}>{statusDetails.title}</Text>
+          <Text style={styles.statusDescription}>
+            {statusDetails.description}
+          </Text>
+        </View>
 
-      <View style={styles.timelineContainer}>
-        <View style={styles.timeline}>
-          <View
-            style={[
-              styles.timelineItem,
-              status === 'pending' && styles.activeTimelineItem,
-            ]}>
-            <View style={styles.timelineDot} />
-            <Text style={styles.timelineText}>Order Received</Text>
-          </View>
+        <View style={styles.timelineContainer}>
+          <View style={styles.timeline}>
+            <View
+              style={[
+                styles.timelineItem,
+                status === 'pending' && styles.activeTimelineItem,
+              ]}>
+              <View style={styles.timelineDot} />
+              <Text style={styles.timelineText}>Order Received</Text>
+            </View>
 
-          <View
-            style={[
-              styles.timelineItem,
-              status === 'confirmed' && styles.activeTimelineItem,
-            ]}>
-            <View style={styles.timelineDot} />
-            <Text style={styles.timelineText}>Order Confirmed</Text>
-          </View>
+            <View
+              style={[
+                styles.timelineItem,
+                status === 'confirmed' && styles.activeTimelineItem,
+              ]}>
+              <View style={styles.timelineDot} />
+              <Text style={styles.timelineText}>Order Confirmed</Text>
+            </View>
 
-          <View
-            style={[
-              styles.timelineItem,
-              status === 'preparing' && styles.activeTimelineItem,
-            ]}>
-            <View style={styles.timelineDot} />
-            <Text style={styles.timelineText}>Preparing</Text>
-          </View>
+            <View
+              style={[
+                styles.timelineItem,
+                status === 'preparing' && styles.activeTimelineItem,
+              ]}>
+              <View style={styles.timelineDot} />
+              <Text style={styles.timelineText}>Preparing</Text>
+            </View>
 
-          <View
-            style={[
-              styles.timelineItem,
-              status === 'out_for_delivery' && styles.activeTimelineItem,
-            ]}>
-            <View style={styles.timelineDot} />
-            <Text style={styles.timelineText}>Out for Delivery</Text>
-          </View>
+            <View
+              style={[
+                styles.timelineItem,
+                status === 'out_for_delivery' && styles.activeTimelineItem,
+              ]}>
+              <View style={styles.timelineDot} />
+              <Text style={styles.timelineText}>Out for Delivery</Text>
+            </View>
 
-          <View
-            style={[
-              styles.timelineItem,
-              status === 'delivered' && styles.activeTimelineItem,
-            ]}>
-            <View style={styles.timelineDot} />
-            <Text style={styles.timelineText}>Delivered</Text>
+            <View
+              style={[
+                styles.timelineItem,
+                status === 'delivered' && styles.activeTimelineItem,
+              ]}>
+              <View style={styles.timelineDot} />
+              <Text style={styles.timelineText}>Delivered</Text>
+            </View>
           </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+
+      {status === 'delivered' && (
+        <TouchableOpacity
+          style={styles.homeButton}
+          onPress={() => navigation.navigate('Home')}>
+          <Text style={styles.homeButtonText}>Back to Home</Text>
+        </TouchableOpacity>
+      )}
+    </View>
   );
 };
 
@@ -152,21 +210,32 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  content: {
-    padding: 16,
-  },
   header: {
-    marginBottom: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  backButton: {
+    marginRight: 16,
   },
   orderId: {
     fontSize: 20,
     fontWeight: 'bold',
     color: colors.primary,
   },
+  content: {
+    flex: 1,
+  },
+  contentContainer: {
+    padding: 16,
+  },
   estimatedTime: {
     fontSize: 16,
     color: '#666',
-    marginTop: 8,
+    marginBottom: 24,
+    textAlign: 'center',
   },
   statusContainer: {
     alignItems: 'center',
@@ -212,6 +281,18 @@ const styles = StyleSheet.create({
   timelineText: {
     fontSize: 16,
     color: '#333',
+  },
+  homeButton: {
+    backgroundColor: colors.primary,
+    padding: 16,
+    margin: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  homeButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
